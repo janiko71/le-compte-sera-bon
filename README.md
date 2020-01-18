@@ -8,7 +8,7 @@ Il s'agit de retrouver (calculer) un nombre compris entre 100 et 999, à partir 
 
 Tous les nombres de ce problème doivent être des entiers positifs, y compris les résultats intermédiaires.
  
-Ce programme teste TOUTES les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat le plus proche (qu'il soit supérieur ou inférieur au nombre recherché).
+Ce programme teste **toutes** les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat le plus proche (qu'il soit supérieur ou inférieur au nombre recherché).
 
 Sur mon PC ou sur mon smartphone, le temps d'exécution est de moins d'une seconde.
 
