@@ -353,7 +353,7 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 # Saisie des valeurs du tirage (plaques)
 #
 
-c = input("Entrez les 6 nombres du tirzge (plaques) : ")
+c = input("Entrez les 6 nombres du tirage (plaques) : ")
 
 if c == "":
     tirage = tirage_test
