@@ -29,6 +29,7 @@ import copy
 
 nombre_a_trouver_test = 945
 tirage_test = [7, 6, 1, 4, 5, 9]
+tirage_test = [5, 5, 5, 7, 7, 7]
 
 # "Distance" = Ecart entre une solution en cours d'évaluation et le nombre cible. AU départ, elle est "infinie".
 best_guess_dist = 999
@@ -92,35 +93,6 @@ class Nombre:
 #
 #
 
-#-----------------------------------------
-def remove(liste, nombre):
-#-----------------------------------------
-
-    """
-        Enlève un nombre dans une liste de nombre. 
-        La liste renvoyée en résultat est une COPIE
-        de la liste initiale, pour éviter de modifier
-        cette liste initiale, ce qui perturberait les
-        boucles for et la récursion.
-    """
-    result_liste = []
-
-    # On parcourt la liste initiale et on en crée une copie, sauf pour l'élément en paramètre
-
-    for elem in liste:
-
-        if (elem.nb == nombre.nb) and (elem.chemin == nombre.chemin):
-
-            # Pour l'élément en paramètre (nombre à supprimer), on ne fait rien
-            pass
-
-        else:
-
-            # Sinon on copie l'élément dans la liste renvoyée
-            result_liste.append(elem)
-
-    return result_liste
-
 
 #-----------------------------------------
 def est_present(nombre, liste):
@@ -144,16 +116,32 @@ def copie_nombres(nombres_disponibles, nombre):
 #-----------------------------------------
 
     """
-        Réalise une copie d'une liste de nombre en supprimant le nombre passé en paramètre
+        Réalise une copie d'une liste de nombre, mais en supprimant le nombre passé en paramètre.
+        
+        Attention : il ne faut le supprimer qu'une fois, car il faut se rappeler que les nombres
+                    de 1 à 10 peuvent être en double.
+
+        La liste renvoyée en résultat est une COPIE de la liste initiale, pour éviter de modifier
+        cette liste initiale, ce qui perturberait les boucles for et la récursion.
     """
+
+    supprime = False
 
     new_liste = []
 
+    # On parcourt la liste initiale et on en crée une copie, sauf pour l'élément en paramètre
+
     for elem in nombres_disponibles:
 
-        if (elem.nb == nombre.nb) and (elem.chemin == nombre.chemin):
-            pass
+        if (elem.nb == nombre.nb) and (elem.chemin == nombre.chemin) and not supprime:
+
+            # Pour l'élément en paramètre (nombre à supprimer), on ne fait rien
+            # Attention : il ne faut le supprimer qu'une fois !
+            supprime = True
+
         else:
+
+            # Sinon on copie l'élément dans la liste renvoyée
             new_liste.append(Nombre(elem.nb, elem.chemin, elem.lg_chemin))
 
     return new_liste
