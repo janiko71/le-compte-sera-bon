@@ -16,6 +16,21 @@ Sur mon PC ou sur mon smartphone, le temps d'exécution est de moins d'une secon
 
 Parmi les 24 plaques, il y a les entiers de 1 à 10 (chacun étant en double exemplaire), soit 20 plaques. Les 4 dernières plaques sont 25, 50, 75, 100 (un seul exemplaire).
 
+## Exemples
+### Exemple avec une solution
+Tirage : 5, 9, 7, 4, 1, 6
+
+Nombre à trouver : 945
+
+Solution : 945 = (5 x 9) x (7 - 4) x (6 + 1)
+
+### Exemple sans solution exacte
+Tirage : 7, 3, 1, 4, 5, 9
+
+Nombre recherché : 599
+
+Meilleure solution possible : 600 = ((5 x (7 + 3)) x (9 + 4 - 1)
+
 ## Pourquoi ce programme ?
 
 Au cours d'une discussion avec des collègues, au sujet des ordinateurs et de l'intelligence artificielle, j'avais lancé un exemple d'emploi détruit par les ordinateurs : celui (entre autres) de l'animateur [des Chiffres et des Lettres](https://fr.wikipedia.org/wiki/Des_chiffres_et_des_lettres) en charge du jeu le Compte est Bon.
