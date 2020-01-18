@@ -23,14 +23,21 @@ import io, os, sys, time
 import re
 import copy
 
+import random
+
 #
 # Quelques globales...
 #
 
-nombre_a_trouver_test = 945
-tirage_test = [7, 6, 1, 4, 5, 9]
-tirage_test = [5, 5, 5, 7, 7, 7]
-
+nombre_a_trouver_test = random.randrange(100, 999)
+plaques = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100]
+tirage_test = []
+for i in range(0,6):
+    lg = len(plaques)
+    rg = random.randrange(0, lg)
+    tirage_test.append(plaques[rg])
+    plaques.remove(plaques[rg])
+    
 # "Distance" = Ecart entre une solution en cours d'évaluation et le nombre cible. AU départ, elle est "infinie".
 best_guess_dist = 999
 
@@ -238,9 +245,12 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
     if dist == 0:
 
-        # On a trouvé une solution possible. On l'affiche.
+        # On a trouvé une solution possible. On l'affiche (et uniquement lui)
 
-        print(liste_nb)
+        for elem in liste_nb:
+
+            if elem.nb == nombre_a_trouver.nb:
+                print(elem)
 
         return True
 
@@ -374,6 +384,17 @@ else:
     nombre_a_trouver = Nombre(int(d))
 
 #
+#  Affichage du tirage
+#
+
+print('\nNombre à trouver : {}\n'.format(nombre_a_trouver.nb))
+str_tirage = "Tirage :"
+for elem in liste_tirage:
+    str_tirage = str_tirage + " " + str(elem.nb)
+print(str_tirage)
+print()
+
+#
 #
 # Recherche de solution : lecture des données et lancement de la recherche
 #
@@ -399,4 +420,4 @@ if (best_guess_dist != 0):
 
 t1 = time.time()
 
-print("Durée de la recherche : {:.2f} sec.".format(t1 - t0))
+print("\nDurée de la recherche : {:.2f} sec.\n".format(t1 - t0))
