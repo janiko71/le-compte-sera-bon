@@ -10,8 +10,6 @@ Tous les nombres de ce problème doivent être des entiers positifs, y compris l
  
 Ce programme teste **toutes** les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat le plus proche (qu'il soit supérieur ou inférieur au nombre recherché).
 
-Sur mon PC ou sur mon smartphone, le temps d'exécution est de moins d'une seconde.
-
 ## Les 24 plaques
 
 Parmi les 24 plaques, il y a les entiers de 1 à 10 (chacun étant en double exemplaire), soit 20 plaques. Les 4 dernières plaques sont 25, 50, 75, 100 (un seul exemplaire).
@@ -39,4 +37,4 @@ En effet, pendant de très longues années, aucun ordinateur ne pouvait analyser
 
 Quant à la meilleure solution possible, c'est-à-dire la plus proche de la valeur recherchée, le problème était encore plus complexe car on ne peut être sûr de ne pas avoir de solution qu'après avoir examiné toutes les combinaisons possibles, et la meilleure solution ne peut apparaître qu'une fois avoir épuisé toutes les solutions.
 
-Donc, par défi, j'ai voulu voir comment résoudre le problème et surtout en combien de temps. L'algorithme n'est pas spécialement optimisé, mais il tourne sur un smartphone, en Python, en moins d'une seconde... Un problème à la combinatoire de ce niveau, impossible à résoudre rapidement il y a encore quelques années, et aujourd'hui largement à la portée de mon smartphone.
+Donc, par défi, j'ai voulu voir comment résoudre le problème et surtout en combien de temps. L'algorithme n'est pas spécialement optimisé, mais il tourne sur un smartphone, en Python, en moins d'une seconde... Un problème à la combinatoire de ce niveau, impossible à résoudre rapidement il y a encore quelques années, et aujourd'hui largement à la portée de mon smartphone (à vérifier avec le nouvel algo).
