@@ -46,6 +46,9 @@ for i in range(0,6):
     tirage_test.append(plaques[rg])
     plaques.remove(plaques[rg])
 
+global nb_combinaisons_testees
+nb_combinaisons_testees = 0
+
 
 #
 #    Classe des nombres utilisés pour la recherche
@@ -130,6 +133,10 @@ class NombreAtteignable:
 def compose(nombre_a, nombre_b, operation, inverse = False):
 #-----------------------------------------
         
+    global nb_combinaisons_testees
+
+    nb_combinaisons_testees = nb_combinaisons_testees + 1
+
     if not inverse:
         val = "{} {} {}".format(nombre_a.nb, operation, nombre_b.nb)
     else:
@@ -475,10 +482,12 @@ else:
     # Sinon on affiche la valeur la plus proche trouvée
     print("Solution la plus proche trouvée : {}".format(meilleure_solution))
 
+str_nb = "{:,}".format(nb_combinaisons_testees)
+str_nb = str_nb.replace(","," ")
 
 # Fin d'exécution et affichage durée de la recherche
 # ----
 
 t1 = time.time()
 
-print("\nDurée de la recherche : {:.2f} sec.\n".format(t1 - t0))
+print("\nDurée de la recherche : {:.2f} sec, avec {} combinaisons testées.\n".format(t1 - t0, str_nb))
