@@ -19,14 +19,6 @@
 #
 #
 
-# *******************************************
-# PRB 
-#
-# Tirage : 672 avec 100, 75, 7, 5, 1, 3
-# Ne trouve que 673 !!
-#  673 = ((100 x 7) - ((1 + (75 + 5)) / 3))
-# Or 672 = 100 x (5 + 1) + 75 - 3
-
 import io, os, sys, time
 import re
 import copy
