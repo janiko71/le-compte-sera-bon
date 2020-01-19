@@ -16,18 +16,18 @@ Parmi les 24 plaques, il y a les entiers de 1 à 10 (chacun étant en double exe
 
 ## Exemples
 ### Exemple avec une solution
-Tirage : 5, 9, 7, 4, 1, 6
+Tirage : 5 9 7 4 1 6
 
 Nombre à trouver : 945
 
 Solution : 945 = (5 x 9) x (7 - 4) x (6 + 1)
 
 ### Exemple sans solution exacte
-Tirage : ...
+Tirage : 2 5 10 75 8 100
 
-Nombre recherché : ...
+Nombre recherché : 681
 
-Meilleure solution possible : ...
+Meilleure solution possible : [680] = (8 x (10 + 75))
 
 ## Pourquoi ce programme ?
 
