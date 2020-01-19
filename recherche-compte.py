@@ -300,6 +300,7 @@ def recherche_solution(liste_nb, nombre_a_trouver):
                 # On a trouvé mieux
                 distance_meilleure_solution = distance
                 meilleure_solution = Nombre(nombre_a.nb, nombre_a.chemin, nombre_a.lg_chemin)
+                print("Meilleure solution : {}".format(meilleure_solution), end="\r", flush=True)
 
             if distance == 0:
 
