@@ -1,6 +1,6 @@
 # Le compte sera bon
 
-Algorithme de résolution du jeu "le compte est bon"
+Algorithme de résolution du jeu "le compte est bon". S'il n'y a pas de solution exacte, la solution la plus proche est indiquée.
 
 ## Principe
 
@@ -8,7 +8,7 @@ Il s'agit de retrouver (calculer) un nombre compris entre 100 et 999, à partir 
 
 Tous les nombres de ce problème doivent être des entiers positifs, y compris les résultats intermédiaires.
  
-Ce programme teste **toutes** les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat le plus proche (qu'il soit supérieur ou inférieur au nombre recherché).
+Ce programme teste **toutes** les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat **le plus proche** (qu'il soit supérieur ou inférieur au nombre recherché).
 
 ## Les 24 plaques
 
