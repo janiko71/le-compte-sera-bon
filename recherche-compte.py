@@ -302,7 +302,7 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
                 # On l'affiche si c'est la 1ère
                 if len(liste_des_solutions) == 1:
-                    print("Première solution trouvée en {:.2f}) sec. : {}\n".format(time.time() - t0, solution))
+                    print("Première solution trouvée en {:.2f} sec. : {}\n".format(time.time() - t0, solution))
 
 
             # On va calculer toutes les possibilités avec les nombres restants, pour l'élément en cours d'examen
