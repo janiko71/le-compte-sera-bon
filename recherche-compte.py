@@ -148,15 +148,18 @@ def compose(nombre_a, nombre_b, operation, inverse = False):
 
     # On compose le chemin (= façon de calculer le nombre)
 
-    if operation == "*":
-        operation = "x"
-    elif operation == "//":
-        operation = "/"
 
     if not inverse:
-        new_nombre.chemin = "({} {} {})".format(nombre_a.chemin, operation, nombre_b.chemin)
+        x, y = nombre_a, nombre_b
     else:
-        new_nombre.chemin = "({} {} {})".format(nombre_b.chemin, operation, nombre_a.chemin)
+        x, y = nombre_b, nombre_a
+
+    if operation == "*":
+        new_nombre.chemin = "({} x {})".format(x.chemin, y.chemin)
+    elif operation == "//":
+        new_nombre.chemin = "({} / {})".format(x.chemin, y.chemin)
+    else:
+        new_nombre.chemin = "({} {} {})".format(x.chemin, operation, y.chemin)
 
     return new_nombre   
 
@@ -317,13 +320,13 @@ def recherche_solution(liste_nb, nombre_a_trouver):
                 # ---
                 # On imagine que le nombre résultat ne doit pas être trop grand, mais ça n'est pas obligatoire
                 #
-
+                    
                 if (a + b) < 1200:
 
                     # On crée un nouveau "noeud"
 
                     liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "+")
+                    nouveau_nombre = compose(nombre_b, nombre_a, "+")
                     nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
                     liste_base_recherche.append(nb)
                     valeur_cree = True
@@ -334,20 +337,12 @@ def recherche_solution(liste_nb, nombre_a_trouver):
                 # Le résultat doit rester positif, donc si (a - b) est négatif, on tester la soustraction (b - a)
                 #
 
-                if (a - b) > 0:
+                if b > a:
 
                     # On crée un nouveau "noeud"
-                    
-                    liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "-")
-                    nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                    liste_base_recherche.append(nb)
-                    valeur_cree = True
-
-                elif (a - b) < 0:
 
                     liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "-", inverse = True)
+                    nouveau_nombre = compose(nombre_b, nombre_a, "-")
                     nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
                     liste_base_recherche.append(nb)
                     valeur_cree = True
@@ -361,8 +356,10 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
                 if ((a * b) < 1200) and (a != 1) and (b != 1):
 
+                    # On crée un nouveau "noeud"
+
                     liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "*", inverse = True)
+                    nouveau_nombre = compose(nombre_b, nombre_a, "*")
                     nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
                     liste_base_recherche.append(nb)
                     valeur_cree = True   
@@ -373,22 +370,14 @@ def recherche_solution(liste_nb, nombre_a_trouver):
                 # On ne teste la division que si elle est possible (résultat entier).
                 # Note : le résultat peut être 1 (ça peut servir, des fois)
 
-                if (b >= a):
-
-                    if (a % b == 0) and (b != 1):
-
-                        liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                        nouveau_nombre = compose(nombre_a, nombre_b, "//")
-                        nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                        liste_base_recherche.append(nb)
-                        valeur_cree = True   
-
-                if (a < b):
+                if b > a:
 
                     if (b % a == 0) and (a != 1):
 
+                        # On crée un nouveau "noeud"
+
                         liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                        nouveau_nombre = compose(nombre_a, nombre_b, "//", inverse = True)
+                        nouveau_nombre = compose(nombre_b, nombre_a, "//")
                         nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
                         liste_base_recherche.append(nb)
                         valeur_cree = True   
@@ -416,6 +405,11 @@ if c == "":
     tirage = tirage_test
 else:
     tirage = re.split('[, :;/]', c)
+
+# On trie le tirage
+# Très important !
+# Dans l'algo général, on aura toujours b >= a
+tirage.sort()
 
 # Création de la liste initiale (= liste des nombres du tirage)
 # ----
