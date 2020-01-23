@@ -42,56 +42,8 @@ global nb_combinaisons_testees
 nb_combinaisons_testees = 0
 
 
+
 #
-#    Classe des nombres utilisés pour la recherche
-#
-#    Objectif : Mémoriser la façon dont on a calculé le nombre en question. S'il s'agit d'un nombre 
-#               du tirage initial, alors le chemin associé au nombre est lui-même. 
-#
-
-class Nombre:
-    
-    #-----------------------------------------
-    def __init__(self, nb, chemin = "", lg_chemin = 1):
-    #-----------------------------------------
-
-        """
-            Constructeur d'un Nombre
-        """
-
-        # On mémorise le nombre lui-même (entier positif)
-
-        self.nb = nb 
-
-        # Le chemin est la façon de calculer le nombre en question (sous forme de texte). On garde aussi sa longueur (nombre de nombres utilisés).
-    
-        if chemin == "":
-
-            # Par défaut, si le chemin fournit est vide, c'est qu'il s'agit d'un nombre issu du tirage.
-            self.chemin = str(nb)
-            self.lg_chemin = 1
-
-        else:
-
-            # Si un chemin est fourni, on le recopie
-            self.chemin  = chemin
-            self.lg_chemin = lg_chemin
-
-
-    #-----------------------------------------
-    def __repr__(self):
-    #-----------------------------------------
-
-        """
-            Affichage de la représentation du nombre (on affiche le nombre ainsi que la façon de le calculer)
-        """
-
-        # On affiche le nombre et son "chemin", à savoir la façon de le calculers+
-
-        return "[{}] = {} (lg:{})".format(self.nb, self.chemin, self.lg_chemin)
-
-
-
 #    Classe des objets des nombres atteignables
 #
 #    Un nombre atteignable est une combinaison des nombres du tirage ou des valeurs intérmédiaires produites lors de la recherche.
@@ -100,144 +52,157 @@ class Nombre:
 
 class NombreAtteignable:
 
-    def __init__(self, valeur, nombres_restants = []):
+    def __init__(self, valeur, liste_nombres_utilises, liste_nombres_a_tester, chemin = ""):
 
         self.valeur = valeur
-        self.nombres_restants = nombres_restants
+        self.nombres_utilises = liste_nombres_utilises
+        self.nombres_a_tester = liste_nombres_a_tester
+        if chemin == "":
+            self.chemin = str(valeur)
+        else:
+            self.chemin = chemin
 
-    def possede_nombre_restants(self):
-
-        return len(self.nombres_restants) == 0
 
     def __repr__(self):
 
-        return "{} ; {}".format(self.valeur, self.nombres_restants)
+        if len(self.nombres_utilises) == 0:
+            return "{}".format(self.valeur)
+        else:
+            return "{} ={}".format(self.valeur, self.chemin)
 
 
+    def identique(self, nombre):
 
-#
-#
-#  Fonctions utiles à la recherche
-#
-#
+        # Renvoie 'True' si les nombres sont "identiques", à savoir qu'ils ont la même valeur et 
+        # qu'ils ont été construits à partir de la même liste de nombres.
 
-#-----------------------------------------
-def compose(nombre_a, nombre_b, operation, inverse = False):
-#-----------------------------------------
-        
-    global nb_combinaisons_testees
+        if (self.valeur != nombre.valeur):
+            return False
+        elif (self.nombres_utilises != nombre.nombres_utilises):
+            return False       
+        elif (self.nombres_a_tester != nombre.nombres_a_tester):
+            return False
+        elif (self.chemin != nombre.chemin):
+            return False
+        else:
+            return True
 
-    nb_combinaisons_testees = nb_combinaisons_testees + 1
 
-    if not inverse:
-        val = "{} {} {}".format(nombre_a.nb, operation, nombre_b.nb)
-    else:
-        val = "{} {} {}".format(nombre_b.nb, operation, nombre_a.nb)
-        
-    # Le nouveau nombre est construit à partir des deux nombres 'nb_a' et 'nb_b' combinés par une opération
-
-    new_nombre = Nombre(eval(val))
-
-    # La longueur du chemin est la somme des chemins des deux nombres. 
     #
-    # Exemple : si on a 31 = 25 + 6, et 11 = 7 + 4, et que l'opération est '+',
-    #           on obtiendra 42 = 31 + 11 = (26 + 6) + (7 + 4). On a donc en réalité
-    #           utilisé 4 nombres (= longueur du chemin).
+    # Opérations sur les nombres atteignables (composition de deux nombres)
+    #
 
-    new_nombre.lg_chemin = nombre_a.lg_chemin + nombre_b.lg_chemin
+    @staticmethod
+    def addition(nombre_a, b: int):
 
-    # On compose le chemin (= façon de calculer le nombre)
+        valeur = nombre_a.valeur + b
+        liste_nombres_utilises = copy.deepcopy(nombre_a.nombres_utilises)
+        liste_nombres_utilises.append(b)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_a.nombres_a_tester)
+        liste_nombres_restants.remove(b)
+        chemin = "({} + {})".format(nombre_a.chemin, str(b))
 
-    if operation == "*":
-        operation = "x"
-    elif operation == "//":
-        operation = "/"
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
 
-    if not inverse:
-        new_nombre.chemin = "({} {} {})".format(nombre_a.chemin, operation, nombre_b.chemin)
+    @staticmethod
+    def soustraction_ab(nombre_a, b: int):
+
+        valeur = nombre_a.valeur - b
+        liste_nombres_utilises = copy.deepcopy(nombre_a.nombres_utilises)
+        liste_nombres_utilises.append(b)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_a.nombres_a_tester)
+        liste_nombres_restants.remove(b)
+        chemin = "({} - {})".format(nombre_a.chemin, str(b))
+
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
+
+    @staticmethod
+    def soustraction_ba(a: int, nombre_b):
+
+        valeur = a - nombre_b.valeur
+        liste_nombres_utilises = copy.deepcopy(nombre_b.nombres_utilises)
+        liste_nombres_utilises.append(a)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_b.nombres_a_tester)
+        liste_nombres_restants.remove(a)
+        chemin = "({} - {})".format(str(a), nombre_b.chemin, )
+
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
+
+    @staticmethod
+    def multiplication(nombre_a, b: int):
+
+        valeur = nombre_a.valeur * b
+        liste_nombres_utilises = copy.deepcopy(nombre_a.nombres_utilises)
+        liste_nombres_utilises.append(b)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_a.nombres_a_tester)
+        liste_nombres_restants.remove(b)
+        chemin = "({} x {})".format(nombre_a.chemin, str(b))
+
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
+
+    @staticmethod
+    def division_ab(nombre_a, b: int):
+
+        valeur = nombre_a.valeur // b
+        liste_nombres_utilises = copy.deepcopy(nombre_a.nombres_utilises)
+        liste_nombres_utilises.append(b)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_a.nombres_a_tester)
+        liste_nombres_restants.remove(b)
+        chemin = "({} x {})".format(nombre_a.chemin, str(b))
+
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
+
+    @staticmethod
+    def division_ba(a:int, nombre_b):
+
+        valeur = a // nombre_b.valeur
+        liste_nombres_utilises = copy.deepcopy(nombre_b.nombres_utilises)
+        liste_nombres_utilises.append(a)
+        liste_nombres_utilises.sort()
+        liste_nombres_restants = copy.deepcopy(nombre_b.nombres_a_tester)
+        liste_nombres_restants.remove(a)
+        chemin = "({} x {})".format(str(a), nombre_b.chemin)
+
+        return NombreAtteignable(valeur, liste_nombres_utilises, liste_nombres_restants, chemin)
+
+
+#-----------------------------------------
+def ajoute_liste_recherche(liste_recherche, nb):
+#-----------------------------------------
+
+    # Ajoute un nombre dans la liste de recherche de solution
+    #
+    # On n'ajoute 'nb' que s'il ne s'agit pas d'un doublon. Un doublon est un nombre
+    # qu'on a déjà dans la liste et utilisant les mêmes chiffres (peu importe les 
+    # opérations et leur ordre).
+
+    valeurs = []
+    nb_restants = []
+    for elem in liste_recherche:
+        valeurs.append(elem.valeur)
+        nb_restants.append(copy.deepcopy(elem.nombres_a_tester))
+
+    if not (nb.valeur in valeurs):
+        # La valeur du nombre n'est pas dans la liste, c'est forcément un nouveau nombre
+        liste_recherche.append(nb)
+        return True
+    elif not (nb.nombres_a_tester in nb_restants):
+        # La valeur existe déjà, mais elle a été trouvée à partir de nombres différents, donc on l'ajout
+        liste_recherche.append(nb)
+        return True
     else:
-        new_nombre.chemin = "({} {} {})".format(nombre_b.chemin, operation, nombre_a.chemin)
-
-    return new_nombre   
-
-
-#-----------------------------------------
-def copie_nombres(nombres_disponibles, nombre):
-#-----------------------------------------
-
-    """
-        Réalise une copie d'une liste de nombre, mais en supprimant le nombre passé en paramètre.
-        
-        Attention : il ne faut le supprimer qu'une fois, car il faut se rappeler que les nombres
-                    de 1 à 10 peuvent être en double.
-
-        La liste renvoyée en résultat est une COPIE de la liste initiale, pour éviter de modifier
-        cette liste initiale, ce qui perturberait les boucles for et la récursion.
-    """
-
-    supprime = False
-
-    new_liste = []
-
-    # On parcourt la liste initiale et on en crée une copie, sauf pour l'élément en paramètre
-
-    for elem in nombres_disponibles:
-
-        if (elem.nb == nombre.nb) and (elem.chemin == nombre.chemin) and not supprime:
-
-            # Pour l'élément en paramètre (nombre à supprimer), on ne fait rien
-            # Attention : il ne faut le supprimer qu'une fois !
-            supprime = True
-
-        else:
-
-            # Sinon on copie l'élément dans la liste renvoyée
-            new_liste.append(Nombre(elem.nb, elem.chemin, elem.lg_chemin))
-
-    return new_liste
-
-
+        # La valeur a été trouvée, et elle a été construite avec les mêmes nombres (peu importantes les variantes
+        # et les opérations utilisées), alors on ne rajoute pas ce nombre dans la liste, pour optimiser la recherche.
+        return False
 
 
 #-----------------------------------------
-def copie_liste(nombres_disponibles, nombre):
-#-----------------------------------------
-
-    """
-        Réalise une copie d'une liste de nombre, mais en supprimant le nombre passé en paramètre.
-        
-        Attention : il ne faut le supprimer qu'une fois, car il faut se rappeler que les nombres
-                    de 1 à 10 peuvent être en double.
-
-        La liste renvoyée en résultat est une COPIE de la liste initiale, pour éviter de modifier
-        cette liste initiale, ce qui perturberait les boucles for et la récursion.
-    """
-
-    supprime = False
-
-    new_liste = []
-
-    # On parcourt la liste initiale et on en crée une copie, sauf pour l'élément en paramètre
-
-    for elem in nombres_disponibles:
-
-        if (elem.nb == nombre.nb) and (elem.chemin == nombre.chemin) and not supprime:
-
-            # Pour l'élément en paramètre (nombre à supprimer), on ne fait rien
-            # Attention : il ne faut le supprimer qu'une fois !
-            supprime = True
-
-        else:
-
-            # Sinon on copie l'élément dans la liste renvoyée
-            new_liste.append(Nombre(elem.nb, elem.chemin, elem.lg_chemin))
-
-    return new_liste
-
-
-
-#-----------------------------------------
-def recherche_solution(liste_nb, nombre_a_trouver):
+def recherche_solution(liste_recherche, nombre_a_trouver):
 #-----------------------------------------
 
     """
@@ -257,19 +222,11 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
     liste_des_solutions = []
 
+    nb_combinaisons_testees = 0
+
     meilleure_solution = None
     distance_meilleure_solution = 999
-
-    liste_base_recherche = []
-
-    # Construction du graphe des valeurs possibles
-
-    # Initialisation du graphe
-
-    for nombre in liste_nb:
-
-        liste_nombre_restants = copie_nombres(liste_nb, nombre)
-        liste_base_recherche.append(NombreAtteignable(nombre, liste_nombre_restants))
+    temps_solution = 0.0
 
     # Recherche générale
 
@@ -279,77 +236,93 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
         valeur_cree = False
 
-        for nombre_atteignable in liste_base_recherche:
+        new_liste_recherche = []
 
-            nombre_a = nombre_atteignable.valeur
+        for nombre_a in liste_recherche:
+
+            # On examine toutes les possibilités pour 'nombre_a'. Donc on peut le retirer de la liste
+            # servant de base à la recherche 
+            
+            # On fait une copie de la liste de recherche, en excluant l'élément en cours
+
+            valeur = nombre_a.valeur
 
             # On mémorise la meilleure solution
 
-            distance = abs(nombre_a.nb - nombre_a_trouver.nb)
+            distance = abs(valeur - nombre_a_trouver)
 
             if (distance < distance_meilleure_solution):
 
                 # On a trouvé mieux
                 distance_meilleure_solution = distance
-                meilleure_solution = Nombre(nombre_a.nb, nombre_a.chemin, nombre_a.lg_chemin)
-                print("Meilleure solution : {}".format(meilleure_solution), end="\r", flush=True)
+                meilleure_solution = NombreAtteignable(nombre_a.valeur, [], [], nombre_a.chemin)
 
             if distance == 0:
 
                 # Ici, on a carrément trouvé une solution !
-                solution = Nombre(nombre_a.nb, nombre_a.chemin, nombre_a.lg_chemin)
+                solution = NombreAtteignable(nombre_a.valeur, [], [], nombre_a.chemin)
                 liste_des_solutions.append(solution)
 
-                # On l'affiche si c'est la 1ère
+                # On mémorise le temps mis pour trouver la 1ère solution
                 if len(liste_des_solutions) == 1:
-                    print("Première solution trouvée en {:.2f} sec. : {}\n".format(time.time() - t0, solution))
+                    temps_solution = time.time() - t0
+
+            # On affiche l'avancement de la recherche, et la meilleure solution jusqu'à présent
+            
+            if (distance_meilleure_solution > 0):
+                print("Meilleure solution : {} {}, nombre de combinaisons testées : {} ({})".format(meilleure_solution, meilleure_solution.chemin, nb_combinaisons_testees, len(liste_recherche)), end="\r", flush=True)
+            else:
+                print("Première solution : {} {}, trouvée en {:.2f} sec., nombre de combinaisons testées : {} ({})".format(meilleure_solution, meilleure_solution.chemin, temps_solution, nb_combinaisons_testees, len(liste_recherche)), end="\r", flush=True)
 
 
-            # On va calculer toutes les possibilités avec les nombres restants, pour l'élément en cours d'examen
+            # On va calculer toutes les possibilités avec les nombres restants (tous les nombres
+            # sauf le nombre_a), pour l'élément en cours d'examen
 
-            for nombre_b in nombre_atteignable.nombres_restants:
+            for nombre_b in nombre_a.nombres_a_tester:
 
-                a = nombre_a.nb
-                b = nombre_b.nb
+                a = nombre_a.valeur
+                b = nombre_b
 
                 #
                 # Test addition
                 # ---
                 # On imagine que le nombre résultat ne doit pas être trop grand, mais ça n'est pas obligatoire
                 #
-
+                    
                 if (a + b) < 1200:
 
                     # On crée un nouveau "noeud"
 
-                    liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "+")
-                    nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                    liste_base_recherche.append(nb)
+                    nb_combinaisons_testees = nb_combinaisons_testees + 1
+
+                    nb = NombreAtteignable.addition(nombre_a, nombre_b)
+                    ajoute_liste_recherche(new_liste_recherche, nb)
                     valeur_cree = True
 
                 #
-                # Test soustraction
+                # Test soustractions
                 # ---
                 # Le résultat doit rester positif, donc si (a - b) est négatif, on tester la soustraction (b - a)
                 #
 
-                if (a - b) > 0:
+                if a > b:
 
                     # On crée un nouveau "noeud"
-                    
-                    liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "-")
-                    nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                    liste_base_recherche.append(nb)
+
+                    nb_combinaisons_testees = nb_combinaisons_testees + 1
+
+                    nb = NombreAtteignable.soustraction_ab(nombre_a, nombre_b)
+                    ajoute_liste_recherche(new_liste_recherche, nb)
                     valeur_cree = True
 
-                elif (a - b) < 0:
+                if b > a:
 
-                    liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "-", inverse = True)
-                    nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                    liste_base_recherche.append(nb)
+                    # On crée un nouveau "noeud"
+
+                    nb_combinaisons_testees = nb_combinaisons_testees + 1
+
+                    nb = NombreAtteignable.soustraction_ba(nombre_b, nombre_a)
+                    ajoute_liste_recherche(new_liste_recherche, nb)
                     valeur_cree = True
 
                 #
@@ -361,11 +334,13 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 
                 if ((a * b) < 1200) and (a != 1) and (b != 1):
 
-                    liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                    nouveau_nombre = compose(nombre_a, nombre_b, "*", inverse = True)
-                    nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                    liste_base_recherche.append(nb)
-                    valeur_cree = True   
+                    # On crée un nouveau "noeud"
+
+                    nb_combinaisons_testees = nb_combinaisons_testees + 1
+
+                    nb = NombreAtteignable.multiplication(nombre_a, nombre_b)
+                    ajoute_liste_recherche(new_liste_recherche, nb)
+                    valeur_cree = True
 
                 #
                 # Test division (entière)
@@ -373,33 +348,43 @@ def recherche_solution(liste_nb, nombre_a_trouver):
                 # On ne teste la division que si elle est possible (résultat entier).
                 # Note : le résultat peut être 1 (ça peut servir, des fois)
 
-                if (b >= a):
-
-                    if (a % b == 0) and (b != 1):
-
-                        liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                        nouveau_nombre = compose(nombre_a, nombre_b, "//")
-                        nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                        liste_base_recherche.append(nb)
-                        valeur_cree = True   
-
-                if (a < b):
+                if b > a:
 
                     if (b % a == 0) and (a != 1):
 
-                        liste_nb_restants = copie_liste(nombre_atteignable.nombres_restants, nombre_b)
-                        nouveau_nombre = compose(nombre_a, nombre_b, "//", inverse = True)
-                        nb = NombreAtteignable(nouveau_nombre, liste_nb_restants)
-                        liste_base_recherche.append(nb)
-                        valeur_cree = True   
+                        # On crée un nouveau "noeud"
 
-            # On enlève le noeud qu'on vient d'examiner, sinon on tombe dans une boucle infinie...
+                        nb_combinaisons_testees = nb_combinaisons_testees + 1
 
-            liste_base_recherche.remove(nombre_atteignable)
+                        nb = NombreAtteignable.division_ba(b, nombre_a)
+                        ajoute_liste_recherche(new_liste_recherche, nb)
+                        valeur_cree = True
 
+                if b < a:
 
-    return liste_des_solutions, meilleure_solution
+                    if (a % b == 0) and (b != 1):
 
+                        # On crée un nouveau "noeud"
+
+                        nb_combinaisons_testees = nb_combinaisons_testees + 1
+
+                        nb = NombreAtteignable.division_ab(nombre_a, b)
+                        ajoute_liste_recherche(new_liste_recherche, nb)
+                        valeur_cree = True
+
+        liste_recherche = new_liste_recherche
+
+        # On enlève aussi les doublons. 
+        # Exemple de doublons : (2 x 2) + 3 et (2 + 2 + 3). Le résultat est 7, et on utilise les mêmes nombres.
+        # Peu importe qu'il existe plusieurs façons d'arriver à 7, il suffit de garder une des façons de calculer...
+        # Donc on considère qu'il y a un doublon quand on a plusieurs façons d'arriver au même résultat avec les mêmes 
+        # nombres, mais des opérations différentes.
+
+        pass
+
+    print()
+
+    return liste_des_solutions, meilleure_solution, nb_combinaisons_testees
 
 
 
@@ -410,12 +395,23 @@ def recherche_solution(liste_nb, nombre_a_trouver):
 #
 # =================================================================================================================
 
-c = input("Entrez les 6 nombres du tirage (plaques) : ")
+ch = input("Entrez les 6 nombres du tirage (plaques) : ")
 
-if c == "":
-    tirage = tirage_test
+if ch == "":
+    tirage_str = tirage_test
 else:
-    tirage = re.split('[, :;/]', c)
+    tirage_str = re.split('[, :;/]', ch)
+
+# On trie le tirage
+# Très important !
+# Dans l'algo général, on aura toujours b >= a
+tirage = []
+try:
+    for elem in tirage_str:
+        tirage.append(int(elem))
+except ValueError as e:
+    print("Une des valeurs en entrée n\'est pas numérique : {}.".format(elem))
+    exit(1)
 
 # Création de la liste initiale (= liste des nombres du tirage)
 # ----
@@ -423,11 +419,11 @@ else:
 liste_tirage = []
 
 for elem in tirage:
-    try:
-        liste_tirage.append(Nombre(int(elem)))
-    except ValueError as e:
-        print("Une des valeurs en entrée n\'est pas numérique : {}.".format(elem))
-        exit(1)
+
+    nombres_utilises = []
+    nombres_restants = copy.deepcopy(tirage) 
+    nombres_restants.remove(elem)
+    liste_tirage.append(NombreAtteignable(elem, nombres_utilises, nombres_restants))
 
 #
 # Saisie du nombre à chercher
@@ -436,18 +432,18 @@ for elem in tirage:
 d = input("Entrez le nombre à trouver : ")
 
 if d == "":
-    nombre_a_trouver = Nombre(nombre_a_trouver_test)
+    nombre_a_trouver = nombre_a_trouver_test
 else:
-    nombre_a_trouver = Nombre(int(d))
+    nombre_a_trouver = int(d)
 
 #
 #  Affichage du tirage
 #
 
-print('\nNombre à trouver : {}\n'.format(nombre_a_trouver.nb))
+print('\nNombre à trouver : {}\n'.format(nombre_a_trouver))
 str_tirage = "Tirage :"
 for elem in liste_tirage:
-    str_tirage = str_tirage + " " + str(elem.nb)
+    str_tirage = str_tirage + " " + str(elem.valeur)
 print(str_tirage)
 print()
 
@@ -465,17 +461,17 @@ t0 = time.time()
 # Lancement de la recherche (récursive)
 # ----
 
-solutions, meilleure_solution = recherche_solution(liste_tirage, nombre_a_trouver)
+solutions, meilleure_solution, nb_comb = recherche_solution(liste_tirage, nombre_a_trouver)
 
 if (len(solutions) > 0):
     # On a au moins une solution
     for elem in solutions:
-        print(elem)
+        print("{} = {}".format(elem, elem.chemin))
 else:
     # Sinon on affiche la valeur la plus proche trouvée
-    print("Solution la plus proche trouvée : {}".format(meilleure_solution))
+    print("Solution la plus proche trouvée : {} = {}".format(meilleure_solution, meilleure_solution.chemin))
 
-str_nb = "{:,}".format(nb_combinaisons_testees)
+str_nb = "{:,}".format(nb_comb)
 str_nb = str_nb.replace(","," ")
 
 # Fin d'exécution et affichage durée de la recherche
