@@ -41,6 +41,8 @@ for i in range(0,6):
 global nb_combinaisons_testees
 nb_combinaisons_testees = 0
 
+global limite
+limite = 1000
 
 #
 #    Classe des noeuds de recherche
@@ -52,7 +54,7 @@ nb_combinaisons_testees = 0
 class Nombre:
     
     #-----------------------------------------
-    def __init__(self, valeur, a, b, operation):
+    def __init__(self, valeur, chemin):
     #-----------------------------------------
 
         """
@@ -62,9 +64,7 @@ class Nombre:
         # On mémorise le nombre lui-même (entier positif)
 
         self.val  = valeur
-        self.a    = a
-        self.b    = b
-        self.ope  = operation
+        self.chemin = chemin
 
 
     #-----------------------------------------
@@ -77,13 +77,38 @@ class Nombre:
 
         # On affiche le nombre et son "chemin", à savoir la façon de le calculers+
 
-        return "{} = ({} {} {})".format(self.val, self.a, self.ope, self.b)
+        return "{} = ({})".format(self.val, self.chemin)
+
+
+    #-----------------------------------------
+    def identique(self, nb):
+    #-----------------------------------------
+
+        """
+            Indique si deux 'Nombre's sont identiques ou pas
+        """
+
+        if (self.val != nb.val):
+            return False
+        elif (self.chemin != nb.chemin):
+            return False
+        else:
+            return True
+
+
+def remove_nombre(liste, nombre):
+
+    for elem in liste:
+        if elem.identique(nombre):
+            liste.remove(elem)
+    return
 
 
 # --------------------------------------------------------------
 def combinaisons_possibles(liste_nombres, nb_a_trouver):
 # --------------------------------------------------------------
 
+    global limite
 
     liste = []
 
@@ -93,43 +118,54 @@ def combinaisons_possibles(liste_nombres, nb_a_trouver):
 
     if (len(liste_nombres) == 2):
         
-        a = liste_nombres[0]
-        b = liste_nombres[1]
+        nombre_a = liste_nombres[0]
+        nombre_b = liste_nombres[1]
+
+        a = nombre_a.val
+        b = nombre_b.val
 
         # Test addition
         
         val = a + b
-        liste.append(val)
-        #liste.append(Nombre(val, a, b, '+'))
+        chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
+        if (val < limite):
+            liste.append(Nombre(val, chemin))
+            #liste.append(Nombre(val, a, b, '+'))
 
         # Test multiplication
         
         if (a != 1) and (b !=1):
             val = a * b
-            liste.append(val)
-            #liste.append(Nombre(val, a, b, '+'))
+            chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
+            if (val < limite):
+                liste.append(Nombre(val, chemin))
+                #liste.append(Nombre(val, a, b, '+'))
 
         # Test soustraction
         
         if (a > b):
             val = a - b
-            liste.append(val)
+            chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
+            liste.append(Nombre(val, chemin))
             #liste.append(Nombre(val, a, b, '+'))
         elif (b > a):
             val = b - a
-            liste.append(val)
+            chemin = "({} - {})".format(b, a)
+            liste.append(Nombre(val, chemin))
             #liste.append(Nombre(val, a, b, '+'))
 
         # Test division
         
         if (b > 1) and (a >= b) and (a % b == 0):
             val = a // b
-            liste.append(val)
+            chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
+            liste.append(Nombre(val, chemin))
             #liste.append(Nombre(val, a, b, '+'))
             
         if (a > 1) and (b > a) and (b % a == 0):
             val = b // a
-            liste.append(val)
+            chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
+            liste.append(Nombre(val, chemin))
             #liste.append(Nombre(val, a, b, '+'))
 
     #
@@ -141,7 +177,7 @@ def combinaisons_possibles(liste_nombres, nb_a_trouver):
     for nb in liste_nombres:
 
         copie_liste = copy.deepcopy(liste_nombres)
-        copie_liste.remove(nb)
+        remove_nombre(copie_liste, nb)
         liste_int = combinaisons_possibles(copie_liste, nb_a_trouver)
         for elem in liste_int:
             liste_comb_int = combinaisons_possibles([elem, nb], nb_a_trouver)
@@ -167,8 +203,20 @@ def recherche_solution(liste_tirage, nb_a_trouver):
 
     liste = copy.deepcopy(liste_tirage)
     lc = combinaisons_possibles(liste, nb_a_trouver)
-    print(len(lc))
-    print(lc)
+    print("Nombre de combinaisons testées : " + str(len(lc)))
+    distance_solution = 999
+    meilleure_solution = None
+    liste_solutions = []
+    for elem in lc:
+        d = abs(nb_a_trouver - elem.val)
+        if (d < distance_solution):
+            distance_solution = d
+            meilleure_solution = elem
+        if d == 0:
+            liste_solutions.append(elem)
+
+    return liste_solutions, meilleure_solution, len(lc)
+        
           
 
 
@@ -197,7 +245,7 @@ liste_tirage = []
 
 for elem in tirage:
     try:
-        liste_tirage.append(int(elem))
+        liste_tirage.append(Nombre(int(elem), elem))
     except ValueError as e:
         print("Une des valeurs en entrée n\'est pas numérique : {}.".format(elem))
         exit(1)
@@ -238,11 +286,11 @@ t0 = time.time()
 # Lancement de la recherche (récursive)
 # ----
 
-#solutions, meilleure_solution = recherche_solution(liste_tirage, nombre_a_trouver)
+solutions, meilleure_solution, nbc = recherche_solution(liste_tirage, nombre_a_trouver)
 #recherche_solution([2, 4, 10], nombre_a_trouver)
-recherche_solution(liste_tirage, nombre_a_trouver)
+#recherche_solution(liste_tirage, nombre_a_trouver)
 
-"""
+
 if (len(solutions) > 0):
     # On a au moins une solution
     for elem in solutions:
@@ -251,7 +299,7 @@ else:
     # Sinon on affiche la valeur la plus proche trouvée
     print("Solution la plus proche trouvée : {}".format(meilleure_solution))
 
-str_nb = "{:,}".format(nb_combinaisons_testees)
+str_nb = "{:,}".format(nbc)
 str_nb = str_nb.replace(","," ")
 
 # Fin d'exécution et affichage durée de la recherche
@@ -260,4 +308,3 @@ str_nb = str_nb.replace(","," ")
 t1 = time.time()
 
 print("\nDurée de la recherche : {:.2f} sec, avec {} combinaisons testées.\n".format(t1 - t0, str_nb))
-"""
