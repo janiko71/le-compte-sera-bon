@@ -37,6 +37,9 @@ for i in range(0,6):
     rg = random.randrange(0, lg)
     tirage_test.append(plaques[rg])
     plaques.remove(plaques[rg])
+
+#tirage_test = [5, 100, 4, 7]
+#nombre_a_trouver_test = 528
     
 global distance_solution
 distance_solution = 999
@@ -122,16 +125,16 @@ def ajoute_nombre(liste, nombre):
     
     distance = abs(nombre.val - nb_a_trouver)
     if (distance < distance_solution):
-        distance_solution = distance
-        meilleure_solution = copy.deepcopy(nombre)
-        print("Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, nb_combinaisons_testees), end="\r", flush=True)
-    if (distance == 0):
-        meilleure_solution = copy.deepcopy(nombre)
-        liste_solutions.append(meilleure_solution)
-        if (distance_solution > 0):
-            print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees), end="\r", flush=True)
+        if distance > 0:
+            meilleure_solution = copy.deepcopy(nombre)
+            print("Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, nb_combinaisons_testees), end="\r", flush=True)
         else:
-            distance_solution = 0
+            # distance = 0...
+            meilleure_solution = copy.deepcopy(nombre)
+            liste_solutions.append(meilleure_solution)
+            if (distance_solution > 0):
+                print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees), end="\r", flush=True)
+        distance_solution = distance
 
 # --------------------------------------------------------------
 def remove_nombre(liste, nombre):
@@ -163,7 +166,6 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
     if (val < limite):
         ajoute_nombre(liste, Nombre(val, chemin))
-        liste.append(Nombre(val, chemin))
         #liste.append(Nombre(val, a, b, '+'))
 
     # Test multiplication
@@ -173,7 +175,7 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
         if (val < limite):
-            liste.append(Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin))
             #liste.append(Nombre(val, a, b, '+'))
 
     # Test soustraction
@@ -182,7 +184,7 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         val = a - b
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
-        liste.append(Nombre(val, chemin))
+        ajoute_nombre(liste, Nombre(val, chemin))
         #liste.append(Nombre(val, a, b, '+'))
     """   
     elif (b > a):
@@ -295,20 +297,6 @@ def recherche_solution(liste_tirage):
 
     liste = copy.deepcopy(liste_tirage)
     lc = combinaisons_possibles(liste)
-    print("Nombre de combinaisons testées : " + str(len(lc)))
-    f = open("log.txt","w")
-    distance_solution = 999
-    meilleure_solution = None
-
-    liste_solutions = []
-    for elem in lc:
-        d = abs(nb_a_trouver - elem.val)
-        if (d < distance_solution):
-            distance_solution = d
-            meilleure_solution = elem
-        if d == 0:
-            liste_solutions.append(elem)
-    f.close()
 
     return liste_solutions, meilleure_solution, len(lc)
         
