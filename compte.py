@@ -127,13 +127,13 @@ def ajoute_nombre(liste, nombre):
     if (distance < distance_solution):
         if distance > 0:
             meilleure_solution = copy.deepcopy(nombre)
-            print("Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, nb_combinaisons_testees), end="\r", flush=True)
+            print("Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, nb_combinaisons_testees) + " "*72, end="\r", flush=True)
         else:
             # distance = 0...
             meilleure_solution = copy.deepcopy(nombre)
             liste_solutions.append(meilleure_solution)
             if (distance_solution > 0):
-                print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees), end="\r", flush=True)
+                print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees) + " "*72, end="\r", flush=True)
         distance_solution = distance
 
 # --------------------------------------------------------------
