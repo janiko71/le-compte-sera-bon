@@ -70,7 +70,7 @@ global t0
 class Nombre:
     
     #-----------------------------------------
-    def __init__(self, valeur, chemin):
+    def __init__(self, valeur, chemin, est_plaque = False):
     #-----------------------------------------
 
         """
@@ -81,6 +81,7 @@ class Nombre:
 
         self.val  = valeur
         self.chemin = chemin
+        self.est_plaque = est_plaque
 
 
     #-----------------------------------------
@@ -93,8 +94,10 @@ class Nombre:
 
         # On affiche le nombre et son "chemin", à savoir la façon de le calculers+
 
-        #return "{}".format(self.val)
-        return "{} = ({})".format(self.val, self.chemin)
+        if self.est_plaque:
+            return str(self.val)
+        else:
+            return "{} = ({})".format(self.val, self.chemin)
 
 
     #-----------------------------------------
@@ -136,6 +139,7 @@ def ajoute_nombre(liste, nombre):
                 print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees) + " "*72, end="\r", flush=True)
         distance_solution = distance
 
+
 # --------------------------------------------------------------
 def remove_nombre(liste, nombre):
 # --------------------------------------------------------------
@@ -166,7 +170,6 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
     if (val < limite):
         ajoute_nombre(liste, Nombre(val, chemin))
-        #liste.append(Nombre(val, a, b, '+'))
 
     # Test multiplication
     
@@ -176,7 +179,6 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
         if (val < limite):
             ajoute_nombre(liste, Nombre(val, chemin))
-            #liste.append(Nombre(val, a, b, '+'))
 
     # Test soustraction
     
@@ -185,14 +187,6 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
         ajoute_nombre(liste, Nombre(val, chemin))
-        #liste.append(Nombre(val, a, b, '+'))
-    """   
-    elif (b > a):
-        val = b - a
-        chemin = "({} - {})".format(b, a)
-        liste.append(Nombre(val, chemin))
-        #liste.append(Nombre(val, a, b, '+'))
-    """
 
     # Test division
     
@@ -200,16 +194,8 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         val = a // b
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
-        liste.append(Nombre(val, chemin))
-        #liste.append(Nombre(val, a, b, '+'))
+        ajoute_nombre(liste, Nombre(val, chemin))
 
-    """    
-    if (a > 1) and (b > a) and (b % a == 0):
-        val = b // a
-        chemin = "({} : {})".format(nombre_b.chemin, nombre_a.chemin)
-        liste.append(Nombre(val, chemin))
-        #liste.append(Nombre(val, a, b, '+'))
-    """
 
     return liste
 
@@ -328,7 +314,7 @@ liste_tirage = []
 
 for elem in tirage:
     try:
-        liste_tirage.append(Nombre(int(elem), elem))
+        liste_tirage.append(Nombre(int(elem), elem, True))
     except ValueError as e:
         print("Une des valeurs en entrée n\'est pas numérique : {}.".format(elem))
         exit(1)
