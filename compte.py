@@ -105,7 +105,11 @@ class Nombre:
     #-----------------------------------------
 
         """
-            Indique si deux 'Nombre's sont identiques ou pas
+            Indique si deux 'Nombre's sont identiques ou pas, à partir des valeurs (propriétés) des objets concernés.
+
+            Indispensable car les nombres traités sont des objets, ils ne sont donc considérés comme égaux que s'il s'agit
+            du même objet en mémoire. Or on veut savoir si deux objets sont identiques si leurs valeurs (propriétés) sont 
+            les mêmes ou pas.
         """
 
         if (self.val != nb.val):
@@ -120,29 +124,65 @@ class Nombre:
 def ajoute_nombre(liste, nombre):
 # --------------------------------------------------------------
 
+
+    """
+        On ajoute un nombre dans la liste passée en paramètre. 
+
+        On en profite pour évaluer le nombre, c'est-à-dire voir s'il s'agit
+        de la meilleure solution trouvée jusqu'à présent ou s'il s'agit d'une
+        des solutions possibles. Dans ce cas, on mémorise toutes les solutions
+        que l'on trouve.
+    """
+
     global distance_solution
     global meilleure_solution
+    global liste_solutions
     global nb_a_trouver
+    global ts
     
+    # Ajout dans la liste
+
     liste.append(nombre)
     
+    #
+    #  Vérification de la solution
+    #
+
     distance = abs(nombre.val - nb_a_trouver)
+
     if (distance < distance_solution):
+
+        # Ici on a fait mieux : l'écart avec le nombre à trouver est le plus petit trouvé jusqu'à présent
+
         if distance > 0:
+
+            # Cas où on n'a pas une solution exacte, mais une solution approchée
             meilleure_solution = copy.deepcopy(nombre)
-            print("Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, nb_combinaisons_testees) + " "*72, end="\r", flush=True)
+
+
         else:
-            # distance = 0...
+
+            # distance = 0... Bingo : on a trouvé une solution !
+            ts = time.time()
             meilleure_solution = copy.deepcopy(nombre)
             liste_solutions.append(meilleure_solution)
-            if (distance_solution > 0):
-                print("Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, time.time() - t0, nb_combinaisons_testees) + " "*72, end="\r", flush=True)
+
+
+        # La meilleure solution trouvée est donc maintenant à la distance examinée
         distance_solution = distance
 
 
 # --------------------------------------------------------------
 def remove_nombre(liste, nombre):
 # --------------------------------------------------------------
+
+    """ 
+        Suppression d'un nombre dans une liste
+
+        Comme la liste peut être une copie de la liste contenant initialement le nombre en parmaètre,
+        on ne peut pas faire de test d'égalité directement car on pointe sur des objets. L'égalité est
+        donc déterminée à partir des valeurs de 'nombre', et non de l'objet lui-même.
+    """
 
     for elem in liste:
         if elem.identique(nombre):
@@ -154,9 +194,39 @@ def remove_nombre(liste, nombre):
 def liste_combinaisons_2_nombres(nombre_a, nombre_b):
 # --------------------------------------------------------------
 
+    """
+        Cette fonction teste toutes les combinaisons possibles entre deux nombres, et renvoie la liste
+        des nombres pouvant être produits avec ces deux nombres.
+
+        Les nombres produits doivent être des entiers naturels positifs exclusivement.
+
+        Exemples : 5 et 2 donneront 3 (5 -2), 7 (5 + 2), 10 (2 x 5) mais aucune division (5 / 2 n'est pas entier).
+
+        On suppose qu'il y a une limite supérieure à ne pas dépasser (fixée à 1000), mais je ne sais pas
+        si cette limite figure dans les règles du jeu. 
+    """
+
     global limite
     global nb_a_trouver
     global nb_combinaisons_testees
+    global distance_solution
+    global meilleure_solution
+    global liste_solutions
+    global ts
+
+    # Affichage intermédiaire, état de la recherche
+
+    str_nb = "{:,}".format(nb_combinaisons_testees)
+    str_nb = str_nb.replace(","," ")
+
+    if (len(liste_solutions) == 0):
+        str_aff = "Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, str_nb) + " "*72
+        print(str_aff, end="\r", flush=True)
+    else:
+        str_aff = "Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, ts - t0, str_nb) + " "*72
+        print(str_aff, end="\r", flush=True)
+
+    # Début algo 
 
     liste = []
 
@@ -167,8 +237,8 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     
     val = a + b
     nb_combinaisons_testees = nb_combinaisons_testees + 1
-    chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
-    if (val < limite):
+    if (val < limite) and (val != a) and (val != b):
+        chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
         ajoute_nombre(liste, Nombre(val, chemin))
 
     # Test multiplication
@@ -176,8 +246,8 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     if (a != 1) and (b !=1):
         val = a * b
         nb_combinaisons_testees = nb_combinaisons_testees + 1
-        chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
-        if (val < limite):
+        if (val < limite) and (val != a) and (val != b):
+            chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
 
     # Test soustraction
@@ -185,16 +255,18 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     if (a > b):
         val = a - b
         nb_combinaisons_testees = nb_combinaisons_testees + 1
-        chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
-        ajoute_nombre(liste, Nombre(val, chemin))
+        if (val != a) and (val != b):
+            chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
+            ajoute_nombre(liste, Nombre(val, chemin))
 
     # Test division
     
     if (b > 1) and (a >= b) and (a % b == 0):
         val = a // b
         nb_combinaisons_testees = nb_combinaisons_testees + 1
-        chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
-        ajoute_nombre(liste, Nombre(val, chemin))
+        if (val != a) and (val != b):
+            chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
+            ajoute_nombre(liste, Nombre(val, chemin))
 
 
     return liste
