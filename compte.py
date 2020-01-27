@@ -38,8 +38,8 @@ for i in range(0,6):
     tirage_test.append(plaques[rg])
     plaques.remove(plaques[rg])
 
-#tirage_test = [5, 100, 4, 7]
-#nombre_a_trouver_test = 528
+tirage_test = [8, 5, 3, 3, 6, 8]
+nombre_a_trouver_test = 372
 
 """
 A trouver : 372
@@ -195,9 +195,11 @@ def remove_nombre(liste, nombre):
         donc déterminée à partir des valeurs de 'nombre', et non de l'objet lui-même.
     """
 
+    done = False
     for elem in liste:
-        if elem.identique(nombre):
+        if elem.identique(nombre) and not done:
             liste.remove(elem)
+            done = True
     return
 
 
@@ -269,14 +271,15 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         if (val != a) and (val != b):
             chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
-    
+    """
     if (a < b):
         val = b - a
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} - {})".format(nombre_b.chemin, nombre_a.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
-            
+    """
+
     # Test division
     
     if (b > 1) and (a >= b) and (a % b == 0):
@@ -285,14 +288,14 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         if (val != a) and (val != b):
             chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
-    
+    """
     if (a > 1) and (b > a) and (b % a == 0):
         val = b // a
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} : {})".format(nombre_b.chemin, nombre_a.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
-
+    """
 
     return liste
 
@@ -344,7 +347,7 @@ def combinaisons_possibles(liste_nombres):
 
             for nombre_b in liste_nb_restants:
 
-                lr2 = copy.deepcopy(liste_combinaisons_2_nombres(nombre_a, nombre_b))
+                lr2 = liste_combinaisons_2_nombres(nombre_a, nombre_b)
                 liste = liste + lr2
 
                 # Maintenant il faut combiner chaque liste 'lr' avec l'ensemble des combinaisons des nombres restants
@@ -451,10 +454,13 @@ t0 = time.time()
 
 # Lancement de la recherche (récursive)
 # ----
-solutions, meilleure_solution, nbc = recherche_solution(liste_tirage)
-#recherche_solution([2, 4, 10], nombre_a_trouver)
-#recherche_solution(liste_tirage, nombre_a_trouver)
 
+solutions, meilleure_solution, nbc = recherche_solution(liste_tirage)
+
+t1 = time.time()
+
+# Affichage résultat
+# ---
 
 if (len(solutions) > 0):
     # On a au moins une solution
@@ -470,6 +476,5 @@ str_nb = str_nb.replace(","," ")
 # Fin d'exécution et affichage durée de la recherche
 # ----
 
-t1 = time.time()
 
 print("\nDurée de la recherche : {:.2f} sec, avec {} combinaisons testées.\n".format(t1 - t0, str_nb))
