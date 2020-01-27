@@ -40,6 +40,17 @@ for i in range(0,6):
 
 #tirage_test = [5, 100, 4, 7]
 #nombre_a_trouver_test = 528
+
+"""
+A trouver : 372
+Tirage    : 8 5 3 3 6 8
+Best      : 371 = ((8 + ((3 x (5 + 6)) x (3 + 8))))    512 000 tests
+Or        : 8 x 8 = 64, 5 - 3 = 2, 64 - 2 = 62, 62 x 6 = 372 !!!
+
+Nombre à trouver : 62
+Tirage : 8 5 3 3 8 ==> Ne trouve que 61 avec 9 300 combinaisons
+Tirage : 3 3 5 8 8 ==> Trouve avec 81 700 combinaisons
+"""
     
 global distance_solution
 distance_solution = 999
@@ -258,7 +269,14 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         if (val != a) and (val != b):
             chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
-
+    
+    if (a < b):
+        val = b - a
+        nb_combinaisons_testees = nb_combinaisons_testees + 1
+        if (val != a) and (val != b):
+            chemin = "({} - {})".format(nombre_b.chemin, nombre_a.chemin)
+            ajoute_nombre(liste, Nombre(val, chemin))
+            
     # Test division
     
     if (b > 1) and (a >= b) and (a % b == 0):
@@ -266,6 +284,13 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
+            ajoute_nombre(liste, Nombre(val, chemin))
+    
+    if (a > 1) and (b > a) and (b % a == 0):
+        val = b // a
+        nb_combinaisons_testees = nb_combinaisons_testees + 1
+        if (val != a) and (val != b):
+            chemin = "({} : {})".format(nombre_b.chemin, nombre_a.chemin)
             ajoute_nombre(liste, Nombre(val, chemin))
 
 
