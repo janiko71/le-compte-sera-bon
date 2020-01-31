@@ -38,20 +38,7 @@ for i in range(0,6):
     tirage_test.append(plaques[rg])
     plaques.remove(plaques[rg])
 
-tirage_test = [8, 5, 3, 3, 6, 8]
-nombre_a_trouver_test = 372
-
-"""
-A trouver : 372
-Tirage    : 8 5 3 3 6 8
-Best      : 371 = ((8 + ((3 x (5 + 6)) x (3 + 8))))    512 000 tests
-Or        : 8 x 8 = 64, 5 - 3 = 2, 64 - 2 = 62, 62 x 6 = 372 !!!
-
-Nombre à trouver : 62
-Tirage : 8 5 3 3 8 ==> Ne trouve que 61 avec 9 300 combinaisons
-Tirage : 3 3 5 8 8 ==> Trouve avec 81 700 combinaisons
-"""
-    
+   
 global distance_solution
 distance_solution = 999
 
@@ -81,7 +68,7 @@ global t0
 class Nombre:
     
     #-----------------------------------------
-    def __init__(self, valeur, chemin, est_plaque = False):
+    def __init__(self, valeur, chemin, est_plaque = False, plaques = []):
     #-----------------------------------------
 
         """
@@ -93,6 +80,10 @@ class Nombre:
         self.val  = valeur
         self.chemin = chemin
         self.est_plaque = est_plaque
+        if plaques == []:
+            self.plaques = [valeur]
+        else:
+            self.plaques = plaques
 
 
     #-----------------------------------------
@@ -232,12 +223,15 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     str_nb = "{:,}".format(nb_combinaisons_testees)
     str_nb = str_nb.replace(","," ")
 
-    if (len(liste_solutions) == 0):
-        str_aff = "Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, str_nb) + " "*72
-        print(str_aff, end="\r", flush=True)
-    else:
-        str_aff = "Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, ts - t0, str_nb) + " "*72
-        print(str_aff, end="\r", flush=True)
+    
+    if nb_combinaisons_testees % 500 == 0:
+        if (len(liste_solutions) == 0):
+            str_aff = "Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, str_nb) + " "*72
+            print(str_aff, end="\r", flush=True)
+        else:
+            str_aff = "Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, ts - t0, str_nb) + " "*72
+            print(str_aff, end="\r", flush=True)
+    
 
     # Début algo 
 
@@ -245,6 +239,8 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
 
     a = nombre_a.val
     b = nombre_b.val
+    plaques = nombre_a.plaques + nombre_b.plaques
+    plaques.sort()
 
     # Test addition
     
@@ -252,7 +248,7 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     nb_combinaisons_testees = nb_combinaisons_testees + 1
     if (val < limite) and (val != a) and (val != b):
         chemin = "({} + {})".format(nombre_a.chemin, nombre_b.chemin)
-        ajoute_nombre(liste, Nombre(val, chemin))
+        ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
 
     # Test multiplication
     
@@ -261,7 +257,7 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val < limite) and (val != a) and (val != b):
             chemin = "({} x {})".format(nombre_a.chemin, nombre_b.chemin)
-            ajoute_nombre(liste, Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
 
     # Test soustraction
     
@@ -270,14 +266,14 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} - {})".format(nombre_a.chemin, nombre_b.chemin)
-            ajoute_nombre(liste, Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
     """
     if (a < b):
         val = b - a
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} - {})".format(nombre_b.chemin, nombre_a.chemin)
-            ajoute_nombre(liste, Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
     """
 
     # Test division
@@ -287,14 +283,14 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} : {})".format(nombre_a.chemin, nombre_b.chemin)
-            ajoute_nombre(liste, Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
     """
     if (a > 1) and (b > a) and (b % a == 0):
         val = b // a
         nb_combinaisons_testees = nb_combinaisons_testees + 1
         if (val != a) and (val != b):
             chemin = "({} : {})".format(nombre_b.chemin, nombre_a.chemin)
-            ajoute_nombre(liste, Nombre(val, chemin))
+            ajoute_nombre(liste, Nombre(val, chemin, plaques = plaques))
     """
 
     return liste
@@ -338,6 +334,8 @@ def combinaisons_possibles(liste_nombres):
         # Pour chaque combinaison entre le nombre examiné et nombre du tirage, on va les combiner
         # avec chacun des nombres possibles avec les nombres restants 
 
+        # Boucle principale
+
         for nombre_a in liste_nombres:
 
             liste_nb_restants = copy.deepcopy(liste_nombres)
@@ -362,7 +360,20 @@ def combinaisons_possibles(liste_nombres):
                     lr3 = combinaisons_possibles(liste_param)
                     liste = liste + lr3
 
-    return liste
+    # Pour finir, on élimine les doublons... Et il y a du boulot !
+
+    #liste_nombres.sort(key = lambda l:(l.val, l.plaques))
+    l = sorted(set(liste), key = lambda l:(l.val, l.plaques))
+    liste_finale = []
+    elem_prec_val = None
+    elem_prec_plaques = []
+    for elem in l:
+        if (elem.val != elem_prec_val) or (elem.plaques != elem_prec_plaques):
+            liste_finale.append(elem)
+        elem_prec_val = elem.val
+        elem_prec_plaques = elem.plaques
+
+    return liste_finale
             
 #
 #  Idée de l'algo de recherche
@@ -382,9 +393,9 @@ def recherche_solution(liste_tirage):
     global nb_a_trouver
 
     liste = copy.deepcopy(liste_tirage)
-    lc = combinaisons_possibles(liste)
+    combinaisons_possibles(liste)
 
-    return liste_solutions, meilleure_solution, len(lc)
+    return liste_solutions, meilleure_solution
         
           
 
@@ -405,7 +416,7 @@ else:
 # On trie le tirage
 # Très important !
 # Dans l'algo général, on aura toujours b >= a
-######tirage.sort()
+tirage.sort()
 
 # Création de la liste initiale (= liste des nombres du tirage)
 # ----
@@ -455,12 +466,14 @@ t0 = time.time()
 # Lancement de la recherche (récursive)
 # ----
 
-solutions, meilleure_solution, nbc = recherche_solution(liste_tirage)
+solutions, meilleure_solution = recherche_solution(liste_tirage)
 
 t1 = time.time()
 
 # Affichage résultat
 # ---
+
+print("\n\n")
 
 if (len(solutions) > 0):
     # On a au moins une solution
@@ -470,7 +483,7 @@ else:
     # Sinon on affiche la valeur la plus proche trouvée
     print("Solution la plus proche trouvée : {}".format(meilleure_solution))
 
-str_nb = "{:,}".format(nbc)
+str_nb = "{:,}".format(nb_combinaisons_testees)
 str_nb = str_nb.replace(","," ")
 
 # Fin d'exécution et affichage durée de la recherche
