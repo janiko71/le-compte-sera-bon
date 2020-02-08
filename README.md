@@ -23,11 +23,11 @@ Nombre à trouver : 945
 Solution : 945 = (5 x 9) x (7 - 4) x (6 + 1)
 
 ### Exemple sans solution exacte
-~~Tirage : 2 5 10 75 8 100~~
+Tirage : 2 2 3 4 6 10
 
-~~Nombre recherché : 681~~
+Nombre recherché : 631
 
-~~Meilleure solution possible : [680] = (8 x (10 + 75))~~
+Meilleure solution possible : [630] = ((6 x 10) + 3) x ((2 x 4) + 2) 
 
 ## Pourquoi ce programme ?
 
