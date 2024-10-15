@@ -22,6 +22,7 @@
 import io, os, sys, time
 import re
 import copy
+import signal
 
 import random
 
@@ -59,6 +60,14 @@ global limite
 limite = 1000
 
 global t0
+
+# Fonction à exécuter lorsque CTRL+C est pressé
+def signal_handler(sig, frame):
+    print("\nSignal d'interruption capté, arrêt du programme.")
+    sys.exit(0)  # Sortie propre du programme
+
+# Intercepter le signal SIGINT (CTRL+C)
+signal.signal(signal.SIGINT, signal_handler)
 
 #
 #    Classe des noeuds de recherche
@@ -220,10 +229,10 @@ def liste_combinaisons_2_nombres(nombre_a, nombre_b):
     str_nb = str_nb.replace(","," ")
 
     if (len(liste_solutions) == 0):
-        str_aff = "Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, str_nb) + " "*72
+        str_aff = "Meilleure solution trouvée : {}, nombre de combinaisons testées : {}".format(meilleure_solution, str_nb) + " "*10
         print(str_aff, end="\r", flush=True)
     else:
-        str_aff = "Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, ts - t0, str_nb) + " "*72
+        str_aff = "Première solution trouvée : {} en {:.2f} sec, nombre de combinaisons testées : {}".format(meilleure_solution, ts - t0, str_nb) + " "*10
         print(str_aff, end="\r", flush=True)
 
     # Début algo 
