@@ -386,7 +386,7 @@ else:
 # On trie le tirage
 # Très important !
 # Dans l'algo général, on aura toujours b >= a
-######tirage.sort()
+tirage.sort()
 
 # Création de la liste initiale (= liste des nombres du tirage)
 # ----
