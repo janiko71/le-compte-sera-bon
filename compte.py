@@ -381,7 +381,7 @@ c = input("Entrez les 6 nombres du tirage (plaques) : ")
 if c == "":
     tirage = tirage_test
 else:
-    tirage = re.split('[, :;/]', c)
+    tirage = [int(s) for s in re.split('[, :;/]', c)]
 
 # On trie le tirage
 # Très important !
@@ -439,10 +439,11 @@ solutions, meilleure_solution, nbc = recherche_solution(liste_tirage)
 #recherche_solution([2, 4, 10], nombre_a_trouver)
 #recherche_solution(liste_tirage, nombre_a_trouver)
 
+print()
 
-if (len(solutions) > 0):
+if (len(liste_solutions) > 0):
     # On a au moins une solution
-    for elem in solutions:
+    for elem in liste_solutions:
         print(elem)
 else:
     # Sinon on affiche la valeur la plus proche trouvée
