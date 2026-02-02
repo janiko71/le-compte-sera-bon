@@ -28,10 +28,13 @@ PLAQUES = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50,
 
 
 # --------------------------------------------------------------
-#  Tirage aleatoire
-# --------------------------------------------------------------
 def tirage_aleatoire(n: int = 6) -> List[int]:
-    # Tirage aleatoire de n plaques sans remise
+# --------------------------------------------------------------
+
+    """
+        Tirage aleatoire de n plaques sans remise.
+    """
+
     plaques = PLAQUES[:]
     tirage = []
     for _ in range(n):
@@ -42,18 +45,21 @@ def tirage_aleatoire(n: int = 6) -> List[int]:
 
 
 # --------------------------------------------------------------
-#  Ajout d'un resultat dans la table DP
-# --------------------------------------------------------------
 def _ajoute_resultat(
     results: Dict[int, Set[str]],
     value: int,
     exprs: Set[str],
     cap: Optional[int],
 ) -> None:
-    # Ajoute un resultat possible a un etat de DP.
-    #
-    # - "results" est un dict: valeur -> set(expressions)
-    # - "cap" est une limite optionnelle (heuristique). Si None, pas de limite.
+# --------------------------------------------------------------
+
+    """
+        Ajoute un resultat possible a un etat de DP.
+
+        - "results" est un dict: valeur -> set(expressions)
+        - "cap" est une limite optionnelle (heuristique). Si None, pas de limite.
+    """
+
     if cap is not None and value > cap:
         return
     if value not in results:
@@ -62,24 +68,29 @@ def _ajoute_resultat(
 
 
 # --------------------------------------------------------------
-#  Combinaisons entre deux valeurs
-# --------------------------------------------------------------
 def _combine_expressions(a: int, b: int, ea: Set[str], eb: Set[str]) -> Dict[int, Set[str]]:
-    # Combine toutes les expressions de "a" avec celles de "b" via les 4 operations.
-    #
-    # Retourne un dict: valeur -> set(expressions).
-    #
-    # IMPORTANT: cette fonction suppose que les reductions de symetrie
-    # (a <= b pour les operations commutatives) ont deja ete gerees par l'appelant.
+# --------------------------------------------------------------
+
+    """
+        Combine toutes les expressions de "a" avec celles de "b" via les 4 operations.
+
+        Retourne un dict: valeur -> set(expressions).
+
+        IMPORTANT: cette fonction suppose que les reductions de symetrie
+        (a <= b pour les operations commutatives) ont deja ete gerees par l'appelant.
+    """
+
     out: Dict[int, Set[str]] = {}
 
     # Addition (commutative)
+
     val = a + b
     if val != a and val != b:
         exprs = {f"({xa} + {xb})" for xa in ea for xb in eb}
         out[val] = exprs
 
     # Multiplication (commutative)
+
     if a != 1 and b != 1:
         val = a * b
         if val != a and val != b:
@@ -87,6 +98,7 @@ def _combine_expressions(a: int, b: int, ea: Set[str], eb: Set[str]) -> Dict[int
             out[val] = exprs
 
     # Soustraction (resultat positif)
+
     if a > b:
         val = a - b
         if val != a and val != b:
@@ -94,6 +106,7 @@ def _combine_expressions(a: int, b: int, ea: Set[str], eb: Set[str]) -> Dict[int
             out[val] = exprs
 
     # Division entiere (resultat entier positif)
+    
     if b > 1 and a % b == 0:
         val = a // b
         if val != a and val != b:
@@ -103,25 +116,28 @@ def _combine_expressions(a: int, b: int, ea: Set[str], eb: Set[str]) -> Dict[int
     return out
 
 
-# =================================================================================================
-#  Resolution par DP
-# =================================================================================================
+# --------------------------------------------------------------
 def solve_compte(
     tirage: List[int],
     cible: int,
     cap: Optional[int] = None,
 ) -> Tuple[Set[str], Optional[Tuple[int, str]], int]:
-    # Fonction principale de resolution.
-    #
-    # - "tirage" est la liste des plaques
-    # - "cible" est le nombre a atteindre
-    # - "cap" limite (optionnellement) les valeurs intermediaires
-    #
-    # Retour:
-    #
-    # - toutes les solutions exactes (set d'expressions)
-    # - la meilleure solution approchee (valeur, expression) si pas d'exacte
-    # - le nombre de combinaisons testees
+# --------------------------------------------------------------
+
+    """
+        Fonction principale de resolution.
+
+        - "tirage" est la liste des plaques
+        - "cible" est le nombre a atteindre
+        - "cap" limite (optionnellement) les valeurs intermediaires
+
+        Retour:
+
+        - toutes les solutions exactes (set d'expressions)
+        - la meilleure solution approchee (valeur, expression) si pas d'exacte
+        - le nombre de combinaisons testees
+    """
+
     n = len(tirage)
     if n == 0:
         return set(), None, 0
@@ -137,10 +153,12 @@ def solve_compte(
     # Initialisation des singletons
     #
     # Un seul nombre = une seule expression possible
+
     for i, val in enumerate(tirage):
         dp[1 << i][val] = {str(val)}
 
     # Variables de suivi de la meilleure solution (approchee ou exacte)
+
     best_distance = None
     best_value = None
     best_expr = None
@@ -149,8 +167,14 @@ def solve_compte(
     t0 = time.time()
     ts = None
 
+# --------------------------------------------------------------
     def affiche_etat() -> None:
-        # Affichage en temps reel, sur la meme ligne
+# --------------------------------------------------------------
+
+        """
+            Affichage en temps reel, sur la meme ligne.
+        """
+
         str_nb = "{:,}".format(combinaisons_testees).replace(",", " ")
         if len(solutions) == 0:
             msg = "Meilleure solution trouvee : {}, nombre de combinaisons testees : {}".format(
@@ -167,8 +191,14 @@ def solve_compte(
         # On ajoute des espaces pour effacer une eventuelle ligne plus longue precedente
         print(msg + (" " * 20), end="\r", flush=True)
 
+# --------------------------------------------------------------
     def maj_best(value: int, expr: str) -> None:
-        # Met a jour la meilleure solution globale si on se rapproche de la cible
+# --------------------------------------------------------------
+
+        """
+            Met a jour la meilleure solution globale si on se rapproche de la cible.
+        """
+
         nonlocal best_distance, best_value, best_expr
         dist = abs(value - cible)
         if best_distance is None or dist < best_distance:
@@ -178,10 +208,13 @@ def solve_compte(
             affiche_etat()
 
     # Parcours de tous les masques (tous les sous-ensembles de plaques)
+
     for mask in range(1, 1 << n):
+
         # Cas des singletons
         #
         # Aucun calcul a faire, on a deja la valeur
+
         if mask & (mask - 1) == 0:
             val = next(iter(dp[mask].keys()))
             expr = next(iter(dp[mask][val]))
@@ -197,6 +230,7 @@ def solve_compte(
         #
         # On partitionne "mask" en deux sous-masques non vides,
         # puis on combine toutes les valeurs possibles de ces deux sous-ensembles.
+
         submask = (mask - 1) & mask
         while submask:
             other = mask ^ submask
@@ -228,18 +262,23 @@ def solve_compte(
             submask = (submask - 1) & mask
 
     # Formate la meilleure solution (approchee si pas d'exacte)
+
     best = None
+
     if best_value is not None and best_expr is not None:
         best = (best_value, best_expr)
 
     return solutions, best, combinaisons_testees
 
 
-# =================================================================================================
-#  Main
-# =================================================================================================
+# --------------------------------------------------------------
 def main() -> None:
-    # Entree utilisateur: tirage et cible
+# --------------------------------------------------------------
+
+    """
+        Entree utilisateur, lancement du calcul, puis affichage des resultats.
+    """
+
     c = input("Entrez les 6 nombres du tirage (plaques) : ")
     if c.strip() == "":
         # Si vide, on genere un tirage aleatoire
@@ -259,6 +298,7 @@ def main() -> None:
     #
     # - None => pas de limite (exact)
     # - un entier => coupe certains chemins pour accelerer (heuristique)
+
     cap = None
 
     print("\nNombre a trouver : {}".format(cible))
@@ -266,11 +306,13 @@ def main() -> None:
     print()
 
     # Mesure du temps de calcul
+
     t0 = time.time()
     solutions, best, nbc = solve_compte(tirage, cible, cap=cap)
     t1 = time.time()
 
     # Termine l'affichage en temps reel sur une ligne propre
+
     print()
 
     if solutions:
@@ -292,10 +334,15 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-# --------------------------------------------------------------
-#  Gestion propre de CTRL+C
+
 # --------------------------------------------------------------
     def signal_handler(sig, frame):
+# --------------------------------------------------------------
+
+        """
+            Fonction a executer lorsque CTRL+C est presse.
+        """
+
         print("\nSignal d'interruption capte, arret du programme.")
         sys.exit(0)
 
