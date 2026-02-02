@@ -164,7 +164,8 @@ def solve_compte(
                 duree,
                 str_nb,
             )
-        print(msg, end="\r", flush=True)
+        # On ajoute des espaces pour effacer une eventuelle ligne plus longue precedente
+        print(msg + (" " * 20), end="\r", flush=True)
 
     def maj_best(value: int, expr: str) -> None:
         # Met a jour la meilleure solution globale si on se rapproche de la cible
@@ -268,6 +269,9 @@ def main() -> None:
     t0 = time.time()
     solutions, best, nbc = solve_compte(tirage, cible, cap=cap)
     t1 = time.time()
+
+    # Termine l'affichage en temps reel sur une ligne propre
+    print()
 
     if solutions:
         # Cas solution exacte
