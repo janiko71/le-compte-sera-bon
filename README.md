@@ -10,6 +10,100 @@ Tous les nombres de ce problème doivent être des entiers positifs, y compris l
  
 Ce programme teste **toutes** les combinaisons possibles, donnant ainsi toutes les solutions. Si aucune solution n'est trouvée, on retourne la solution donnant le résultat **le plus proche** (qu'il soit supérieur ou inférieur au nombre recherché).
 
+## Algorithme amélioré (compte_dp.py)
+
+La version `compte_dp.py` utilise une **programmation dynamique sur sous-ensembles** pour éviter de recalculer les mêmes combinaisons. L'idée est de construire toutes les valeurs possibles pour chaque sous-ensemble de plaques, puis de combiner ces sous-ensembles pour former des ensembles plus grands.
+
+### Représentation des sous-ensembles
+
+On représente un sous-ensemble de plaques par un **bitmask** :
+
+- si le bit `i` vaut 1, la plaque `i` est incluse
+- exemple avec 4 plaques : `mask = 0b1011` signifie plaques `0, 1 et 3`
+
+On stocke les résultats sous la forme :
+
+- `dp[mask]` = dictionnaire `valeur -> {expressions}`
+- chaque expression est une chaîne représentant le calcul
+
+### Initialisation
+
+Pour chaque plaque prise seule (`mask` avec un seul bit à 1), on sait déjà :
+
+- valeur = la plaque
+- expression = `"valeur"`
+
+Ainsi, `dp[1 << i][tirage[i]] = {str(tirage[i])}`.
+
+### Construction par partitions
+
+Pour chaque `mask` (sous-ensemble non vide), on le **partitionne** en deux sous-ensembles non vides `A` et `B` :
+
+- on parcourt tous les sous-masques `submask` de `mask`
+- on pose `A = submask` et `B = mask ^ submask`
+- on ne garde que les partitions où `A < B` pour éviter les doublons
+
+Pour chaque valeur possible dans `dp[A]` et `dp[B]`, on combine les expressions.
+
+### Combinaisons autorisées
+
+Les opérations sont les 4 opérations classiques, avec les contraintes :
+
+- **addition** : toujours autorisée, commutative
+- **multiplication** : autorisée, commutative (on évite les multiplications triviales par 1)
+- **soustraction** : uniquement si le résultat est positif
+- **division entière** : uniquement si la division est exacte et positive
+
+Chaque combinaison génère une nouvelle valeur et une ou plusieurs expressions.
+
+### Réduction de symétries
+
+Deux optimisations majeures limitent les doublons :
+
+1) **Commutativité**  
+   Pour `+` et `x`, on impose `a <= b`.  
+   Ainsi, `a + b` et `b + a` ne sont pas calculés deux fois.
+
+2) **Partitions en double**  
+   Les partitions `A|B` et `B|A` sont équivalentes, on ne garde que `A < B`.
+
+### Mémoïsation et accumulation des résultats
+
+Chaque résultat est mémorisé dans `dp[mask]`.  
+Ainsi, si un même sous-ensemble réapparaît, on réutilise immédiatement toutes ses valeurs calculées.
+
+### Suivi de la meilleure solution
+
+Le programme maintient à tout moment :
+
+- la distance minimale à la cible
+- la meilleure expression correspondante
+
+Si une valeur exacte est atteinte, toutes les expressions exactes sont stockées.
+
+### Heuristique optionnelle (cap)
+
+Un **cap** (plafond) sur les valeurs intermédiaires peut être activé :
+
+- `cap = None` : recherche exacte complète
+- `cap = N` : on ignore les valeurs > N (plus rapide, mais non exhaustif)
+
+### Résultat final
+
+À la fin :
+
+- si des solutions exactes existent : on les affiche toutes
+- sinon : on affiche la valeur la plus proche et son expression
+
+### Complexité (intuition)
+
+L'algorithme reste exponentiel, mais **beaucoup plus rapide** que la recherche brute :
+
+- chaque sous-ensemble est calculé **une seule fois**
+- les symétries supprimées réduisent fortement le nombre de combinaisons
+
+En pratique, le calcul est très rapide pour 6 plaques, même sur une machine modeste.
+
 ## Les 24 plaques
 
 Parmi les 24 plaques, il y a les entiers de 1 à 10 (chacun étant en double exemplaire), soit 20 plaques. Les 4 dernières plaques sont 25, 50, 75, 100 (un seul exemplaire).
