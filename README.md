@@ -95,6 +95,29 @@ Un **cap** (plafond) sur les valeurs intermédiaires peut être activé :
 - si des solutions exactes existent : on les affiche toutes
 - sinon : on affiche la valeur la plus proche et son expression
 
+### Pseudo-code (résumé)
+
+```text
+dp[mask] = dict(value -> set(expr))
+
+pour chaque plaque i:
+  dp[1<<i][tirage[i]] = {str(tirage[i])}
+  maj_best(tirage[i], str(tirage[i]))
+
+pour mask de 1 à (1<<n)-1:
+  si mask est un singleton: continuer
+  pour chaque submask propre de mask:
+    other = mask ^ submask
+    si submask < other:
+      pour chaque (a, ea) dans dp[submask]:
+        pour chaque (b, eb) dans dp[other]:
+          si a > b: échanger (a,ea) et (b,eb)
+          combiner a,b via +,x,-,/
+          ajouter chaque résultat à dp[mask]
+          maj_best(valeur, expression)
+          si valeur == cible: stocker solution exacte
+```
+
 ### Complexité (intuition)
 
 L'algorithme reste exponentiel, mais **beaucoup plus rapide** que la recherche brute :
