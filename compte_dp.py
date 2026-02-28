@@ -121,7 +121,7 @@ def solve_compte(
     tirage: List[int],
     cible: int,
     cap: Optional[int] = None,
-) -> Tuple[Set[str], Optional[Tuple[int, str]], int]:
+) -> Tuple[Set[str], Optional[Tuple[int, str]], int, Optional[Tuple[str, float]]]:
 # --------------------------------------------------------------
 
     """
@@ -136,6 +136,7 @@ def solve_compte(
         - toutes les solutions exactes (set d'expressions)
         - la meilleure solution approchee (valeur, expression) si pas d'exacte
         - le nombre de combinaisons testees
+        - la premiere solution exacte trouvee (expression, duree) si elle existe
     """
 
     n = len(tirage)
@@ -163,6 +164,7 @@ def solve_compte(
     best_value = None
     best_expr = None
     solutions: Set[str] = set()
+    first_solution = None
     combinaisons_testees = 0
     t0 = time.time()
     ts = None
@@ -223,6 +225,8 @@ def solve_compte(
                 solutions.add(expr)
                 if ts is None:
                     ts = time.time()
+                if first_solution is None:
+                    first_solution = (expr, ts - t0)
                 affiche_etat()
             continue
 
@@ -262,6 +266,8 @@ def solve_compte(
                                     solutions.add(expr)
                                     if ts is None:
                                         ts = time.time()
+                                    if first_solution is None:
+                                        first_solution = (expr, ts - t0)
                                     affiche_etat()
             submask = (submask - 1) & mask
 
@@ -272,7 +278,7 @@ def solve_compte(
     if best_value is not None and best_expr is not None:
         best = (best_value, best_expr)
 
-    return solutions, best, combinaisons_testees
+    return solutions, best, combinaisons_testees, first_solution
 
 
 # --------------------------------------------------------------
@@ -312,7 +318,7 @@ def main() -> None:
     # Mesure du temps de calcul
 
     t0 = time.time()
-    solutions, best, nbc = solve_compte(tirage, cible, cap=cap)
+    solutions, best, nbc, first_solution = solve_compte(tirage, cible, cap=cap)
     t1 = time.time()
 
     # Termine l'affichage en temps reel sur une ligne propre
@@ -322,7 +328,12 @@ def main() -> None:
     if solutions:
         # Cas solution exacte
         #
-        # On affiche toutes les expressions exactes
+        # On affiche d'abord la premiere solution trouvee, puis toutes les solutions exactes
+        if first_solution is not None:
+            expr, duree = first_solution
+            print("Premiere solution trouvee : {} = {} (en {:.2f} sec)".format(cible, expr, duree))
+            print()
+            print("Toutes les solutions exactes :")
         for expr in sorted(solutions):
             print(f"{cible} = {expr}")
     else:
