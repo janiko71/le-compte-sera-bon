@@ -239,13 +239,17 @@ def solve_compte(
                 right = dp[other]
                 for a, ea in left.items():
                     for b, eb in right.items():
+                        a_cur = a
+                        b_cur = b
+                        ea_cur = ea
+                        eb_cur = eb
                         # Pour operations commutatives, on force a <= b
                         #
                         # On elimine ainsi les symetries a+b et b+a, a*b et b*a.
-                        if a > b:
-                            a, b = b, a
-                            ea, eb = eb, ea
-                        combined = _combine_expressions(a, b, ea, eb)
+                        if a_cur > b_cur:
+                            a_cur, b_cur = b_cur, a_cur
+                            ea_cur, eb_cur = eb_cur, ea_cur
+                        combined = _combine_expressions(a_cur, b_cur, ea_cur, eb_cur)
                         for val, exprs in combined.items():
                             # On compte les combinaisons testees
                             #
