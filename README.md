@@ -67,7 +67,7 @@ Deux optimisations majeures limitent les doublons :
 2) **Partitions en double**  
    Les partitions `A|B` et `B|A` sont équivalentes, on ne garde que `A < B`.
 
-### Mémoïsation et accumulation des résultats
+### Mémorisation et accumulation des résultats
 
 Chaque résultat est mémorisé dans `dp[mask]`.  
 Ainsi, si un même sous-ensemble réapparaît, on réutilise immédiatement toutes ses valeurs calculées.
