@@ -2,6 +2,24 @@
 
 Algorithme de résolution du jeu "le compte est bon". S'il n'y a pas de solution exacte, la solution la plus proche est indiquée.
 
+## Inventaire DNS
+
+Le script indépendant `dns_records.py` inventorie les enregistrements DNS
+accessibles d'un domaine, notamment SPF (TXT), DMARC, DKIM, MTA-STS et TLS-RPT.
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 dns_records.py example.com
+python3 dns_records.py example.com --dkim-selector mon-selecteur --json
+python3 dns_records.py example.com --axfr
+```
+
+Un serveur DNS ne permet généralement pas d'énumérer tous les noms d'une zone.
+Le résultat n'est donc réellement exhaustif que si le transfert de zone
+`--axfr` est autorisé et réussit. Les sélecteurs DKIM ne sont pas énumérables :
+le script teste quelques noms courants et accepte autant d'options
+`--dkim-selector` que nécessaire.
+
 ## Principe
 
 Il s'agit de retrouver (calculer) un nombre compris entre 100 et 999, à partir de 6 nombres tirés aléatoirement parmi 24 plaques. Ces 6 nombres peuvent être combinés par des opérations arithmétiques. Les opérations autorisées sont donc l'addition, la soustraction, la multiplication et la division entière.

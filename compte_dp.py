@@ -97,20 +97,30 @@ def _combine_expressions(a: int, b: int, ea: Set[str], eb: Set[str]) -> Dict[int
             exprs = {f"({xa} x {xb})" for xa in ea for xb in eb}
             out[val] = exprs
 
-    # Soustraction (resultat positif)
+    # Soustraction (resultat positif), dans les deux sens
 
     if a > b:
         val = a - b
         if val != a and val != b:
             exprs = {f"({xa} - {xb})" for xa in ea for xb in eb}
             out[val] = exprs
+    elif b > a:
+        val = b - a
+        if val != a and val != b:
+            exprs = {f"({xb} - {xa})" for xa in ea for xb in eb}
+            out[val] = exprs
 
-    # Division entiere (resultat entier positif)
-    
+    # Division entiere exacte, dans les deux sens
+
     if b > 1 and a % b == 0:
         val = a // b
         if val != a and val != b:
             exprs = {f"({xa} : {xb})" for xa in ea for xb in eb}
+            out[val] = exprs
+    if a > 1 and b % a == 0:
+        val = b // a
+        if val != a and val != b:
+            exprs = {f"({xb} : {xa})" for xa in ea for xb in eb}
             out[val] = exprs
 
     return out
