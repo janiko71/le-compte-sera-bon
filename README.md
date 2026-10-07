@@ -2,24 +2,6 @@
 
 Algorithme de résolution du jeu "le compte est bon". S'il n'y a pas de solution exacte, la solution la plus proche est indiquée.
 
-## Inventaire DNS
-
-Le script indépendant `dns_records.py` inventorie les enregistrements DNS
-accessibles d'un domaine, notamment SPF (TXT), DMARC, DKIM, MTA-STS et TLS-RPT.
-
-```bash
-python3 -m pip install -r requirements.txt
-python3 dns_records.py example.com
-python3 dns_records.py example.com --dkim-selector mon-selecteur --json
-python3 dns_records.py example.com --axfr
-```
-
-Un serveur DNS ne permet généralement pas d'énumérer tous les noms d'une zone.
-Le résultat n'est donc réellement exhaustif que si le transfert de zone
-`--axfr` est autorisé et réussit. Les sélecteurs DKIM ne sont pas énumérables :
-le script teste quelques noms courants et accepte autant d'options
-`--dkim-selector` que nécessaire.
-
 ## Principe
 
 Il s'agit de retrouver (calculer) un nombre compris entre 100 et 999, à partir de 6 nombres tirés aléatoirement parmi 24 plaques. Ces 6 nombres peuvent être combinés par des opérations arithmétiques. Les opérations autorisées sont donc l'addition, la soustraction, la multiplication et la division entière.
@@ -61,7 +43,7 @@ Pour chaque `mask` (sous-ensemble non vide), on le **partitionne** en deux sous-
 - on pose `A = submask` et `B = mask ^ submask`
 - on ne garde que les partitions où `A < B` pour éviter les doublons
 
-Pour chaque valeur possible dans `dp[A]` et `dp[B]`, on combine les expressions.
+Pour chaque valeur possible dans `dp[A]` et `dp[B]`, on combine les expressions et on range les résultats dans `dp[mask]`. Comme les états des deux sous-ensembles sont déjà calculés, chaque plaque est utilisée au plus une fois et chaque combinaison de plaques est construite à partir de résultats plus petits.
 
 ### Combinaisons autorisées
 
@@ -69,8 +51,8 @@ Les opérations sont les 4 opérations classiques, avec les contraintes :
 
 - **addition** : toujours autorisée, commutative
 - **multiplication** : autorisée, commutative (on évite les multiplications triviales par 1)
-- **soustraction** : uniquement si le résultat est positif
-- **division entière** : uniquement si la division est exacte et positive
+- **soustraction** : on teste les deux ordres (`a - b` et `b - a`) et on conserve seulement les résultats strictement positifs
+- **division entière** : on teste les deux ordres et on conserve seulement les divisions exactes de résultat entier positif
 
 Chaque combinaison génère une nouvelle valeur et une ou plusieurs expressions.
 
@@ -79,8 +61,8 @@ Chaque combinaison génère une nouvelle valeur et une ou plusieurs expressions.
 Deux optimisations majeures limitent les doublons :
 
 1) **Commutativité**  
-   Pour `+` et `x`, on impose `a <= b`.  
-   Ainsi, `a + b` et `b + a` ne sont pas calculés deux fois.
+  Pour `+` et `x`, on impose `a <= b`.
+  Ainsi, `a + b` et `b + a` ne sont pas calculés deux fois. Cette réduction ne s'applique pas à `-` et `:` : les deux ordres sont examinés, car ils peuvent produire des résultats différents.
 
 2) **Partitions en double**  
    Les partitions `A|B` et `B|A` sont équivalentes, on ne garde que `A < B`.
@@ -129,8 +111,10 @@ pour mask de 1 à (1<<n)-1:
     si submask < other:
       pour chaque (a, ea) dans dp[submask]:
         pour chaque (b, eb) dans dp[other]:
-          si a > b: échanger (a,ea) et (b,eb)
-          combiner a,b via +,x,-,/
+          ordonner a,b pour + et x
+          calculer a + b et a x b
+          calculer a - b et b - a si le résultat est positif
+          calculer a : b et b : a si la division est exacte
           ajouter chaque résultat à dp[mask]
           maj_best(valeur, expression)
           si valeur == cible: stocker solution exacte
